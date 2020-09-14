@@ -27,6 +27,7 @@ using Gridap.FESpaces: HomogeneousTrialFESpace
 export TransientFETerm
 export TransientAffineFETerm
 export TransientConstantFETerm
+export FETerm_t
 import Gridap.FESpaces: FETerm
 import Gridap.FESpaces: get_cell_residual
 import Gridap.FESpaces: get_cell_jacobian
@@ -38,6 +39,7 @@ using Gridap.FESpaces: integrate
 import Gridap.Geometry: get_cell_id
 using Gridap.FESpaces: _push_matrix_contribution!
 using Gridap.FESpaces: _push_vector_contribution!
+using Gridap.FESpaces: autodiff_cell_jacobian_from_residual
 
 export TransientFEOperator
 export TransientAffineFEOperator
@@ -102,5 +104,7 @@ include("ODEOperatorInterfaces.jl")
 include("TransientFESolvers.jl")
 
 include("TransientFESolutions.jl")
+
+include("TransientFETermsWithAutoDiff.jl")
 
 end #module

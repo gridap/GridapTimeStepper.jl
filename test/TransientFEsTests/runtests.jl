@@ -12,11 +12,15 @@ using Test
 
 @testset "HeatEquationTests" begin include("HeatEquationTests.jl") end
 
+@testset "HeatEquationWithAutoDiffTests" begin include("HeatEquationWithAutoDiffTests.jl") end
+
 @testset "HeatVectorEquationTests" begin include("HeatVectorEquationTests.jl") end
 
 @testset "VectorHeatEquationTests" begin include("VectorHeatEquationTests.jl") end
 
 @testset "StokesEquationTests" begin include("StokesEquationTests.jl") end
+
+@testset "StokesEquationWithAutoDiffTests" begin include("StokesEquationWithAutoDiffTests.jl") end
 
 @testset "BoundaryEquationTests" begin include("BoundaryHeatEquationTests.jl") end
 
