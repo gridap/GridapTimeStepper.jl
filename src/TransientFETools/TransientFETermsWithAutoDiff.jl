@@ -6,7 +6,7 @@ end
 
 function FETerm_t(
   res::Function, trian::Triangulation, quad::CellQuadrature)
-  TransientFETermFromIntegrationWithAutoDiff(res,trian,quad)
+  TransientFETermFromIntegrationWithAutoDiff(res,res_t,trian,quad)
 end
 
 function get_cell_residual(tr::TransientFETermFromIntegrationWithAutoDiff,t::Real,uh,uh_t,v)
@@ -25,7 +25,7 @@ function get_cell_jacobian(tr::TransientFETermFromIntegrationWithAutoDiff,t::Rea
   @assert is_a_fe_cell_basis(v)
   @assert is_a_fe_cell_basis(du)
   _v = restrict(v,tr.trian)
-  _uh_t = restrict(uh_t,tr.trian)  
+  _uh_t = restrict(uh_t,tr.trian)
   function uh_to_cell_residual(uh)
     _uh = restrict(uh,tr.trian)
     integrate(tr.res(t,_uh,_uh_t,_v),tr.trian,tr.quad)
@@ -41,7 +41,6 @@ function get_cell_jacobian_t(tr::TransientFETermFromIntegrationWithAutoDiff,t::R
   @assert is_a_fe_cell_basis(du_t)
   _v = restrict(v,tr.trian)
   _uh = restrict(uh,tr.trian)
-  _du_t = restrict(du_t,tr.trian)  
   function uh_to_cell_residual(uh_t)
     _uh_t = restrict(uh_t,tr.trian)
     integrate(duht_du*tr.res(t,_uh,_uh_t,_v),tr.trian,tr.quad)
