@@ -4,9 +4,9 @@ struct TransientFETermFromIntegrationWithAutoDiff <: TransientFETerm
   quad::CellQuadrature
 end
 
-function FETerm_t(
+function TransientFETerm(
   res::Function, trian::Triangulation, quad::CellQuadrature)
-  TransientFETermFromIntegrationWithAutoDiff(res,res_t,trian,quad)
+  TransientFETermFromIntegrationWithAutoDiff(res,trian,quad)
 end
 
 function get_cell_residual(tr::TransientFETermFromIntegrationWithAutoDiff,t::Real,uh,uh_t,v)
@@ -47,7 +47,6 @@ function get_cell_jacobian_t(tr::TransientFETermFromIntegrationWithAutoDiff,t::R
   end
   cell_j_t = autodiff_cell_jacobian_from_residual(uh_to_cell_residual,uh_t,get_cell_id(tr))
   cell_j_t
-  #integrate(duht_du*tr.jac_t(t,_uh,_uh_t,_du_t,_v),tr.trian,tr.quad)
 end
 
 function get_cell_id(t::TransientFETermFromIntegrationWithAutoDiff)

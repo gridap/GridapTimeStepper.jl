@@ -33,9 +33,14 @@ struct TransientFETermFromIntegration <: TransientFETerm
   quad::CellQuadrature
 end
 
-function FETerm(
+function TransientFETerm(
   res::Function, jac::Function, jac_t::Function, trian::Triangulation, quad::CellQuadrature)
   TransientFETermFromIntegration(res,jac,jac_t,trian,quad)
+end
+
+function FETerm(
+  res::Function, jac::Function, jac_t::Function, trian::Triangulation, quad::CellQuadrature)
+  TransientFETerm(res,jac,jac_t,trian,quad)
 end
 
 function get_cell_residual(tr::TransientFETermFromIntegration,t::Real,uh,uh_t,v)

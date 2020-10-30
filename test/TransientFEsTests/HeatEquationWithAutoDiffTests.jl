@@ -43,8 +43,8 @@ res(t,u,ut,v) = a(u,v) + ut*v - b(v,t)
 jac(t,u,ut,du,v) = a(du,v)
 jac_t(t,u,ut,dut,v) = dut*v
 
-t_Ω = FETerm(res,jac,jac_t,trian,quad)
-t_Ω_ad = FETerm_t(res,trian,quad)
+t_Ω = TransientFETerm(res,jac,jac_t,trian,quad)
+t_Ω_ad = TransientFETerm(res,trian,quad)
 op = TransientFEOperator(U,V0,t_Ω_ad)
 
 Uh = evaluate(U,nothing)
