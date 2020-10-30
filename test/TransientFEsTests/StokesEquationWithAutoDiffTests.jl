@@ -8,6 +8,7 @@ using GridapODEs.ODETools
 using GridapODEs.TransientFETools
 using Gridap.FESpaces #: get_algebraic_operator, get_cell_basis, get_cell_jacobian
 using BlockArrays
+using Gridap.Arrays
 
 # using GridapODEs.ODETools: ThetaMethodLinear
 import Gridap: ∇
@@ -62,15 +63,9 @@ function res(t,x,xt,y)
   u,p = x
   ut,pt = xt
   v,q = y
-  inner(ut,v) + q*(∇⋅u) #- inner(v,f(t)) - q*g(t)
+  a(u,v) + (inner(ut,v) + 0.0*inner(u,v)) - (∇⋅v)*p + (q*(∇⋅u) + 0.0*q*(∇⋅ut)) - inner(v,f(t)) - q*g(t)
 end
-function res_t(t,x,xt,y)
-  u,p = x
-  ut,pt = xt
-  v,q = y
-  0.0*inner(ut,v)
-end
-⋅
+
 function jac(t,x,xt,dx,y)
   du,dp = dx
   v,q = y
@@ -83,18 +78,6 @@ function jac_t(t,x,xt,dxt,y)
   inner(dut,v)
 end
 
-function b(y)
-  v,q = y
-  0.0
-  v⋅f(0.0) + q*g(0.0)
-end
-
-function mat(dx,y)
-  du1,du2 = dx
-  v1,v2 = y
-  a(du1,v1)+a(du2,v2)
-end
-
 U0 = U(0.0)
 P0 = P(0.0)
 X0 = X(0.0)
@@ -102,39 +85,28 @@ uh0 = interpolate_everywhere(u(0.0),U0)
 ph0 = interpolate_everywhere(p(0.0),P0)
 xh0 = interpolate_everywhere([uh0,ph0],X0)
 
-# X, Y steady FESpaces
-x_t = FEFunction(X0,rand(num_free_dofs(X0)))
-x = FEFunction(X0,rand(num_free_dofs(X0)))
-dy = get_cell_basis(Y)
-dx = get_cell_basis(X0)
-t1 = FETerm( (x,dy) -> res(0.0,x,x_t,dy), trian, quad )
-t2 = FETerm( (x_t,dy) -> res(0.0,x,x_t,dy), trian, quad )
-
-aaa = get_cell_values(x_t)
-@show typeof(aaa)
-
-i_to_xdual = apply(aaa) do x
-  cfg = ForwardDiff.JacobianConfig(nothing, x, ForwardDiff.Chunk{length(x)}())
-  xdual = cfg.duals
-  xdual
-end
-
-display(aaa[1][Block(1)])
-display(aaa[1][Block(2)])
-display(i_to_xdual[1][Block(1)])
-display(i_to_xdual[1][Block(2)])
-
-@show blocklength(i_to_xdual[1])
-@show blocklength(aaa[1])
-
-get_cell_jacobian(t1,x,dx,dy)
-get_cell_jacobian(t2,x_t,dx,dy)
-
-hola
-
-t_Ω_ad = FETerm_t(res,trian,quad)
-#t_Ω_ad = FETerm(res,jac,jac_t,trian,quad)
+t_Ω_ad = TransientFETerm(res,trian,quad)
+t_Ω = TransientFETerm(res,jac,jac_t,trian,quad)
 op = TransientFEOperator(X,Y,t_Ω_ad)
+
+Xh = evaluate(X,nothing)
+dx_t = get_cell_basis(Xh)
+dy = get_cell_basis(Y)
+dx = get_cell_basis(Xh)
+xh = FEFunction(Xh,rand(num_free_dofs(Xh)))
+
+cell_r = get_cell_residual(t_Ω,0.5,xh,xh,dy)
+cell_j = get_cell_jacobian(t_Ω,0.5,xh,xh,dx,dy)
+cell_j_t = TransientFETools.get_cell_jacobian_t(t_Ω,0.5,xh,xh,dx_t,dy,0.1)
+
+cell_r_ad = get_cell_residual(t_Ω_ad,0.5,xh,xh,dy)
+cell_j_ad = get_cell_jacobian(t_Ω_ad,0.5,xh,xh,dx,dy)
+cell_j_t_ad = TransientFETools.get_cell_jacobian_t(t_Ω_ad,0.5,xh,xh,dx_t,dy,0.1)
+
+test_array(cell_r_ad,cell_r)
+test_array(cell_j_ad,cell_j)
+test_array(cell_j_t_ad,cell_j_t)
+
 
 t0 = 0.0
 tF = 1.0
